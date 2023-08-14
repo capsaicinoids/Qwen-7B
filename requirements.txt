@@ -2,5 +2,11 @@ transformers==4.31.0
 accelerate
 tiktoken
 einops
+fastapi
 transformers_stream_generator==0.0.4
 scipy
+uvicorn 
+openai 
+pydantic 
+sse_starlette 
+bitsandbytes

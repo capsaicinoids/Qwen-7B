@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Literal, Optional, Union
-from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, BitsAndBytesConfig
 from transformers.generation import GenerationConfig
 from sse_starlette.sse import ServerSentEvent, EventSourceResponse
 
@@ -180,6 +180,9 @@ def _get_args():
                         help="Demo server port.")
     parser.add_argument("--server-name", type=str, default="127.0.0.1",
                         help="Demo server name.")
+    
+    parser.add_argument("--quantization-name", type=str, default='int8',
+                        help="Quantization name")
 
     args = parser.parse_args()
     return args
@@ -197,12 +200,26 @@ if __name__ == "__main__":
     else:
         device_map = "auto"
 
+    if args.quantization_name == 'int8':
+        # Int8 Quantization
+        quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+    elif args.quantization_name == 'nf4':
+        # NF4 Quantization
+        quantization_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_compute_dtype=torch.bfloat16
+        )
+    else:
+        quantization_config = None
+    
     model = AutoModelForCausalLM.from_pretrained(
         args.checkpoint_path,
         device_map=device_map,
+        quantization_config=quantization_config,
         trust_remote_code=True,
-        resume_download=True,
     ).eval()
+    
     
     model.generation_config = GenerationConfig.from_pretrained(
         args.checkpoint_path, trust_remote_code=True, resume_download=True,
