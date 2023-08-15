@@ -17,4 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Run random.py when the container launches. 
 # FastAPI runs on an ASGI server like uvicorn and gunicorn 
 # CMD ["uvicorn", "random:app", "--host", "0.0.0.0", "--port", "8080"]
-CMD ["python", "openai_api.py", "--cpu-only"]
+# CMD ["python", "openai_api.py", "--cpu-only"]
+
+CMD ["python" "openai_api.py" "--quantization-name" "nf4"]

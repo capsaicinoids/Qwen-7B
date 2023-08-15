@@ -10,3 +10,5 @@ openai
 pydantic 
 sse_starlette 
 bitsandbytes
+pyngrok
+nest-asyncio

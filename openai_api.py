@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import time
 import torch
 import uvicorn
+import nest_asyncio
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM, BitsAndBytesConfig
 from transformers.generation import GenerationConfig
 from sse_starlette.sse import ServerSentEvent, EventSourceResponse
+from pyngrok import ngrok
 
 
 @asynccontextmanager
@@ -224,5 +226,8 @@ if __name__ == "__main__":
     model.generation_config = GenerationConfig.from_pretrained(
         args.checkpoint_path, trust_remote_code=True, resume_download=True,
     )
-
-    uvicorn.run(app, host=args.server_name, port=args.server_port, workers=1)
+    
+    ngrok_tunnel = ngrok.connect(8000)
+    print(f'Public URL: {ngrok_tunnel.public_url}')
+    nest_asyncio.apply()
+    uvicorn.run(app, port=args.server_port, workers=1)
